@@ -20,10 +20,6 @@ class ProcessPerProtocol {
     ProcessPerProtocol();
     ~ProcessPerProtocol();
 
-    /* Applications need some way to initiate commmunication */
-    void appication_send_msg(Message* message, int protocol_id);
-    pipe_container ftp_send_pipe, telnet_send_pipe, rdp_send_pipe, dns_send_pipe;
-
     /* Container struct to allow a mutex to be associated with a pipe. Send and
        receive of each protocol will have its own pipe */
     struct pipe_container {
@@ -37,6 +33,11 @@ class ProcessPerProtocol {
       int protocol_id;
       Message *message;
     };
+
+
+    /* Applications need some way to initiate commmunication */
+    void appication_send_msg(Message* message, int protocol_id);
+    pipe_container ftp_send_pipe, telnet_send_pipe, rdp_send_pipe, dns_send_pipe;
 
   private:
     /* Thread pool to contain threads for each protocol */
@@ -116,4 +117,4 @@ class ProcessPerProtocol {
       char other_info[8];
       int message_length;           
     };
-}
+};
