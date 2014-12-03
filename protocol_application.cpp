@@ -13,10 +13,10 @@ int main() {
 
   if(DEBUG) { cout << "Creating message struct to send " << endl; }
   send_message pipe_send;
-  pipe_send.protocol_id = FTP;
+  pipe_send.protocol_id = APPLICATION;
   pipe_send.message = msg;
 
   if(DEBUG) { cout << "Sending message struct over FTP" << endl; }
-  ppp->application_send_msg(pipe_send);
+  ppp->application_send_msg(pipe_send, FTP);
   while(1){}
 }

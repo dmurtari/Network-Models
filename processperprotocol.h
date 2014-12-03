@@ -30,7 +30,7 @@ class ProcessPerProtocol {
     };
 
     /* Applications need some way to initiate commmunication */
-    void application_send_msg(send_message message);
+    void application_send_msg(send_message message, int protocol_id);
     pipe_container ftp_send_pipe, telnet_send_pipe, rdp_send_pipe, dns_send_pipe;
 
   private:
@@ -62,14 +62,13 @@ class ProcessPerProtocol {
     pipe_container ip_send_pipe, ip_receive_pipe;
     pipe_container ethernet_send_pipe, ethernet_receive_pipe;
 
-
+    /* Header structs for each of the headers needing to be supported in PPP */
     struct ftp_header {
       int higher_level_protocol;
       char other_info[8];
       int message_length;           
     };
 
-    /* Header structs for each of the headers needing to be supported in PPP */
     struct telnet_header {
       int higher_level_protocol;
       char other_info[8];

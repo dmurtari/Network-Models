@@ -6,3 +6,4 @@
 #define TELNET 6
 #define RDP 7
 #define DNS 8
+#define APPLICATION 9

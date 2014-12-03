@@ -9,7 +9,6 @@ ProcessPerProtocol::ProcessPerProtocol() {
   if(DEBUG) { cout << "Creating ThreadPool" << endl; }
   protocol_threads = new ThreadPool(16);
   
-
   /* Create pipes */
   if(DEBUG) { cout << "Creating Pipes" << endl; }
   pipe(ftp_send_pipe.pipes); pipe(ftp_receive_pipe.pipes);
@@ -43,12 +42,13 @@ ProcessPerProtocol::ProcessPerProtocol() {
   protocol_threads->dispatch_thread(ftp_send, (void*) this);
 }
 
-void ProcessPerProtocol::application_send_msg(send_message message) {
-  switch(message.protocol_id){
+void ProcessPerProtocol::application_send_msg(send_message message, 
+                                              int protocol_id) {
+  switch(protocol_id){
     case FTP:
       if(DEBUG) { cout << "Locking and writing to FTP Send" << endl; }
       pthread_mutex_lock(&ftp_send_pipe.pipe_mutex);
-      write(ftp_send_pipe.pipes[1], message.message, sizeof(send_message));
+      write(ftp_send_pipe.pipes[1], (char *) &message, sizeof(send_message));
       pthread_mutex_unlock(&ftp_send_pipe.pipe_mutex);
       if(DEBUG) { cout << "Done writing to FTP Send" << endl; }
       break;
@@ -60,6 +60,7 @@ void ProcessPerProtocol::ftp_send(void* arg) {
 
   while(1) {
     send_message* read_from_pipe = new send_message;
+    Message* read_message;
 
     if(DEBUG) { cout << "Locking and reading from FTP Send" << endl; }
     pthread_mutex_lock(&ppp->ftp_send_pipe.pipe_mutex);
@@ -67,6 +68,30 @@ void ProcessPerProtocol::ftp_send(void* arg) {
     pthread_mutex_unlock(&ppp->ftp_send_pipe.pipe_mutex);
     if(DEBUG) { cout << "Done reading from FTP Send" << endl; }
 
+    read_message = read_from_pipe->message;
+
+    ftp_header* head = new ftp_header;
+    head->higher_level_protocol = read_from_pipe->protocol_id;
+    head->message_length = read_message->msgLen();
+
+    if(DEBUG){
+      cout << "Created FTP header with HLP " << head->higher_level_protocol;
+      cout << " and message_length " << head->message_length << endl;
+    }
+
+    if(DEBUG) { cout << "Adding new FTP header to message" << endl; }
+    read_message->msgAddHdr((char*) head, sizeof(ftp_header));
+
+    if(DEBUG) {cout << "Creating message struct to send from FTP" << endl; }
+    send_message ftp_send_message;
+    ftp_send_message.protocol_id = FTP;
+    ftp_send_message.message = read_message;
+
+    if(DEBUG) { cout << "Locking and writing message to TCP send" << endl; }
+    pthread_mutex_lock(&ppp->tcp_send_pipe.pipe_mutex);
+    write(ppp->tcp_send_pipe.pipes[1], (char *) &ftp_send_message, sizeof(send_message));
+    pthread_mutex_unlock(&ppp->tcp_send_pipe.pipe_mutex);
+    if(DEBUG) { cout << "Done writing to TCP Send" << endl; }
   }
 }
 
