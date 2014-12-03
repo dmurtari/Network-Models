@@ -41,7 +41,7 @@ class ProcessPerProtocol {
 
   private:
     /* Thread pool to contain threads for each protocol */
-    ThreadPool* thread_pool;
+    ThreadPool* protocol_threads;
 
     /* Each protocol needs a way to send and receive messages from its pipes */
     void ftp_send(int pipe_id);
