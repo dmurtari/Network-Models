@@ -44,22 +44,22 @@ class ProcessPerProtocol {
     ThreadPool* protocol_threads;
 
     /* Each protocol needs a way to send and receive messages from its pipes */
-    void ftp_send(int pipe_id);
-    void ftp_receive(int pipe_id);
-    void telnet_send(int pipe_id);
-    void telnet_receive(int pipe_id);
-    void rdp_send(int pipe_id);
-    void rdp_receive(int pipe_id);
-    void dns_send(int pipe_id);
-    void dns_receive(int pipe_id);
-    void tcp_send(int pipe_id);
-    void tcp_receive(int pipe_id);
-    void udp_send(int pipe_id);
-    void udp_receive(int pipe_id);
-    void ip_send(int pipe_id);
-    void ip_receive(int pipe_id);
-    void ethernet_send(int pipe_id);
-    void ethernet_receive(int pipe_id);
+    static void ftp_send(void* payload);
+    static void ftp_receive(void* payload);
+    static void telnet_send(void* payload);
+    static void telnet_receive(void* payload);
+    static void rdp_send(void* payload);
+    static void rdp_receive(void* payload);
+    static void dns_send(void* payload);
+    static void dns_receive(void* payload);
+    static void tcp_send(void* payload);
+    static void tcp_receive(void* payload);
+    static void udp_send(void* payload);
+    static void udp_receive(void* payload);
+    static void ip_send(void* payload);
+    static void ip_receive(void* payload);
+    static void ethernet_send(void* payload);
+    static void ethernet_receive(void* payload);
 
     pipe_container ftp_receive_pipe, telnet_receive_pipe, rdp_receive_pipe,
                    dns_receive_pipe;
