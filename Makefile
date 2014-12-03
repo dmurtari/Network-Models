@@ -1,18 +1,20 @@
-#Makefile
-CC = g++
-INCLUDE = /usr/lib
-LIBS = -pthread
-OBJS = 
-CFLAGS = -std=c++11
+CC=g++
+FLAGS=-g -std=gnu++11 -Wall -Wextra
+LIBS=-lpthread
 
-all: clean message threadpool processperprotocol
+all: threadpool.o eventscheduler.o processperprotocol
 
-message:
-	$(CC) -o message message.h $(CFLAGS) $(LIBS)
-threadpool:
-	$(CC) -o threadpool threadpool.h $(CFLAGS) $(LIBS)
-processperprotocol:
-	$(CC) -o processperprotocol processperprotocol.cpp $(CFLAGS) $(LIBS)
+processperprotocol: processperprotocol.cpp threadpool.o message.o
+	$(CC) $(FLAGS) -o $@ $^ $(LIBS)
+
+threadpool.o: threadpool.cpp
+	$(CC) $(FLAGS) -o $@ -c $^
+
+eventscheduler.o: eventscheduler.cpp
+	$(CC) $(FLAGS) -o $@ -c $^
+
+message.o: message.cpp
+	$(CC) $(FLAGS) -o $@ -c $^
 
 clean:
-	rm -f driver1 driver2 driver3 message threadpool processperprotocol
+	rm -f threadpool.o eventscheduler.o processperprotocol
