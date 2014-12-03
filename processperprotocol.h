@@ -81,7 +81,7 @@ class ProcessPerProtocol {
       int message_length;           
     };
 
-    struct dns_client_header {
+    struct dns_header {
       int higher_level_protocol;
       char other_info[8];
       int message_length;           
