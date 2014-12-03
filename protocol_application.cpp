@@ -18,5 +18,8 @@ int main() {
 
   if(DEBUG) { cout << "Sending message struct over FTP" << endl; }
   ppp->application_send_msg(pipe_send, FTP);
+  // ppp->application_send_msg(pipe_send, TELNET);
+  // ppp->application_send_msg(pipe_send, RDP);
+  // ppp->application_send_msg(pipe_send, DNS);
   while(1){}
 }
