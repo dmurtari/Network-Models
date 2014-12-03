@@ -11,6 +11,8 @@
 
 #include "threadpool.h"
 #include "message.h"
+#include "protocolid.h"
+#include "protocol_application.h"
 
 using namespace std;
 
@@ -27,16 +29,8 @@ class ProcessPerProtocol {
       pthread_mutex_t pipe_mutex;
     };
 
-    /* Container to hold pointer to message and the protocol sending the 
-       message */
-    struct send_message {
-      int protocol_id;
-      Message *message;
-    };
-
-
     /* Applications need some way to initiate commmunication */
-    void appication_send_msg(Message* message, int protocol_id);
+    void application_send_msg(send_message message);
     pipe_container ftp_send_pipe, telnet_send_pipe, rdp_send_pipe, dns_send_pipe;
 
   private:
@@ -44,22 +38,22 @@ class ProcessPerProtocol {
     ThreadPool* protocol_threads;
 
     /* Each protocol needs a way to send and receive messages from its pipes */
-    static void ftp_send(void* payload);
-    static void ftp_receive(void* payload);
-    static void telnet_send(void* payload);
-    static void telnet_receive(void* payload);
-    static void rdp_send(void* payload);
-    static void rdp_receive(void* payload);
-    static void dns_send(void* payload);
-    static void dns_receive(void* payload);
-    static void tcp_send(void* payload);
-    static void tcp_receive(void* payload);
-    static void udp_send(void* payload);
-    static void udp_receive(void* payload);
-    static void ip_send(void* payload);
-    static void ip_receive(void* payload);
-    static void ethernet_send(void* payload);
-    static void ethernet_receive(void* payload);
+    static void ftp_send(void* arg);
+    static void ftp_receive(void* arg);
+    static void telnet_send(void* arg);
+    static void telnet_receive(void* arg);
+    static void rdp_send(void* arg);
+    static void rdp_receive(void* arg);
+    static void dns_send(void* arg);
+    static void dns_receive(void* arg);
+    static void tcp_send(void* arg);
+    static void tcp_receive(void* arg);
+    static void udp_send(void* arg);
+    static void udp_receive(void* arg);
+    static void ip_send(void* arg);
+    static void ip_receive(void* arg);
+    static void ethernet_send(void* arg);
+    static void ethernet_receive(void* arg);
 
     pipe_container ftp_receive_pipe, telnet_receive_pipe, rdp_receive_pipe,
                    dns_receive_pipe;

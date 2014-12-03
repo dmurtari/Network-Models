@@ -4,7 +4,7 @@ LIBS=-lpthread
 
 all: threadpool.o eventscheduler.o processperprotocol.o protocol_application
 
-protocol_application: protocol_application.cpp processperprotocol.o message.o threadpool.o
+protocol_application: processperprotocol.o message.o threadpool.o protocol_application.cpp
 	$(CC) $(FLAGS) -o $@ $^ $(LIBS)
 
 processperprotocol.o: processperprotocol.cpp
