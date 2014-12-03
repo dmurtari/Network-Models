@@ -33,14 +33,9 @@ ProcessPerProtocol::ProcessPerProtocol() {
   pthread_mutex_init(&ethernet_send_pipe.pipe_mutex, NULL);
   pthread_mutex_init(&ethernet_receive_pipe.pipe_mutex, NULL);
 
-  protocol_threads->dispatch_thread(ftp_send, NULL;
+  protocol_threads->dispatch_thread(ftp_send, NULL);
 }
 
 void ProcessPerProtocol::ftp_send(void* payload) {
   cout << "hello " << endl;
-}
-
-int main() {
-  ProcessPerProtocol* ppp = new ProcessPerProtocol();
-  while(1){}
 }
