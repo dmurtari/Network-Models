@@ -3,13 +3,16 @@ FLAGS=-g -std=gnu++11 -Wall -Wextra
 LIBS=-lpthread
 
 
-all: threadpool.o eventscheduler.o processperprotocol.o processpermessage protocol_application 
+all: message_application protocol_application 
 
 protocol_application: processperprotocol.o message.o threadpool.o protocol_application.cpp
 	$(CC) $(FLAGS) -o $@ $^ $(LIBS)
 
-processpermessage: processpermessage.cpp message.o threadpool.o
+message_application: processpermessage.o message.o threadpool.o message_application.cpp
 	$(CC) $(FLAGS) -o $@ $^ $(LIBS)
+
+processpermessage.o: processpermessage.cpp 
+	$(CC) $(FLAGS) -o $@ -c $^
 
 processperprotocol.o: processperprotocol.cpp
 	$(CC) $(FLAGS) -o $@ -c $^
