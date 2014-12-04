@@ -8,6 +8,7 @@ ProcessPerProtocol::ProcessPerProtocol() {
 
   if(DEBUG) { cout << "Creating ThreadPool" << endl; }
   protocol_threads = new ThreadPool(17);
+  pthread_mutex_init(&print_mutex, NULL);
   
   /* Create pipes */
   if(DEBUG) { cout << "Creating Pipes" << endl; }
@@ -57,6 +58,10 @@ ProcessPerProtocol::ProcessPerProtocol() {
   protocol_threads->dispatch_thread(rdp_receive, (void*) this);
   protocol_threads->dispatch_thread(dns_receive, (void*) this);
 } 
+
+ProcessPerProtocol::~ProcessPerProtocol() {
+  delete protocol_threads;
+}
 
 void ProcessPerProtocol::application_send_msg(send_message message, 
                                               int protocol_id) {
@@ -140,7 +145,7 @@ void ProcessPerProtocol::ftp_receive(void* arg) {
 
   while(1){
     Message* received_message;
-    char* received_message_buffer = new char[512];
+    char* received_message_buffer = new char[1024];
     send_message* read_from_pipe = new send_message;
 
     if(DEBUG) { cout << "Locking and reading from FTP receive" << endl; }
@@ -153,7 +158,9 @@ void ProcessPerProtocol::ftp_receive(void* arg) {
     received_message->msgStripHdr(sizeof(ftp_header));
     received_message->msgFlat(received_message_buffer);
 
+    pthread_mutex_lock(&ppp->print_mutex);
     cout << "Received message using FTP: " << received_message_buffer << endl;
+    pthread_mutex_unlock(&ppp->print_mutex);
 
     delete received_message_buffer;
   }
@@ -204,7 +211,7 @@ void ProcessPerProtocol::telnet_receive(void* arg) {
 
   while(1){
     Message* received_message;
-    char* received_message_buffer = new char[512];
+    char* received_message_buffer = new char[1024];
     send_message* read_from_pipe = new send_message;
 
     if(DEBUG) { cout << "Locking and reading from TELNET receive" << endl; }
@@ -216,8 +223,10 @@ void ProcessPerProtocol::telnet_receive(void* arg) {
     received_message = read_from_pipe->message;
     received_message->msgStripHdr(sizeof(telnet_header));
     received_message->msgFlat(received_message_buffer);
-
+  
+    pthread_mutex_lock(&ppp->print_mutex);
     cout << "Received message using telnet: " << received_message_buffer << endl;
+    pthread_mutex_unlock(&ppp->print_mutex);
 
     delete received_message_buffer;
   }
@@ -268,7 +277,7 @@ void ProcessPerProtocol::rdp_receive(void* arg) {
 
   while(1){
     Message* received_message;
-    char* received_message_buffer = new char[512];
+    char* received_message_buffer = new char[1024];
     send_message* read_from_pipe = new send_message;
 
     if(DEBUG) { cout << "Locking and reading from RDP receive" << endl; }
@@ -281,7 +290,9 @@ void ProcessPerProtocol::rdp_receive(void* arg) {
     received_message->msgStripHdr(sizeof(rdp_header));
     received_message->msgFlat(received_message_buffer);
 
+    pthread_mutex_lock(&ppp->print_mutex);
     cout << "Received message using RDP: " << received_message_buffer << endl;
+    
 
     delete received_message_buffer;
   }
@@ -332,7 +343,7 @@ void ProcessPerProtocol::dns_receive(void* arg) {
 
   while(1){
     Message* received_message;
-    char* received_message_buffer = new char[512];
+    char* received_message_buffer = new char[1024];
     send_message* read_from_pipe = new send_message;
 
     if(DEBUG) { cout << "Locking and reading from DNS receive" << endl; }
@@ -345,7 +356,9 @@ void ProcessPerProtocol::dns_receive(void* arg) {
     received_message->msgStripHdr(sizeof(dns_header));
     received_message->msgFlat(received_message_buffer);
 
+    pthread_mutex_lock(&ppp->print_mutex);
     cout << "Received message using DNS: " << received_message_buffer << endl;
+    pthread_mutex_unlock(&ppp->print_mutex);
 
     delete received_message_buffer;
   }
@@ -601,7 +614,7 @@ void ProcessPerProtocol::receive_message(void* arg) {
   socklen_t addrlen = sizeof(remaddr);  
   int recvlen;     
   int fd;           
-  char buf[512]; 
+  char buf[1024]; 
 
   /* create a UDP socket */
 
@@ -622,10 +635,7 @@ void ProcessPerProtocol::receive_message(void* arg) {
 
   /* now loop, receiving data and printing what we received */
   while(1) {
-    printf("Waiting on port %d\n", SERVICE_PORT);
-    recvlen = recvfrom(fd, buf, 512, 0, (struct sockaddr *)&remaddr, &addrlen);
-    printf("Received %d bytes\n", recvlen);
-
+    recvlen = recvfrom(fd, buf, 1024, 0, (struct sockaddr *)&remaddr, &addrlen);
     Message* received_message = new Message(buf, recvlen);
 
     send_message ethernet_message;
@@ -670,7 +680,7 @@ void ProcessPerProtocol::ethernet_send(void* arg) {
   while(1) {
     send_message* read_from_pipe = new send_message;
     Message* read_message;
-    char message_buffer[512];
+    char message_buffer[1024];
 
     if(DEBUG) { cout << "Locking and reading from ethernet Send" << endl; }
     pthread_mutex_unlock(&ppp->ethernet_send_pipe.pipe_mutex);
@@ -692,7 +702,6 @@ void ProcessPerProtocol::ethernet_send(void* arg) {
     if(DEBUG) { cout << "Adding new ethernet header to message" << endl; }
     read_message->msgAddHdr((char*) head, sizeof(ethernet_header));
 
-    cout << "Sending over ethernet" << endl;
     memset(&message_buffer, 0, sizeof(message_buffer));
 
     read_message->msgFlat(message_buffer);

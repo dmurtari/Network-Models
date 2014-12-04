@@ -29,6 +29,8 @@ class ProcessPerProtocol {
       pthread_mutex_t pipe_mutex;
     };
 
+    pthread_mutex_t print_mutex;
+
     /* Applications need some way to initiate commmunication */
     void application_send_msg(send_message message, int protocol_id);
     pipe_container ftp_send_pipe, telnet_send_pipe, rdp_send_pipe, dns_send_pipe;
