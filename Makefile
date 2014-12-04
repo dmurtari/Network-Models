@@ -2,9 +2,10 @@ CC=g++
 FLAGS=-g -std=gnu++11 -Wall -Wextra
 LIBS=-lpthread
 
-all: threadpool.o eventscheduler.o processperprotocol.o processperprotocol_application
 
-processperprotocol_application: processperprotocol_application.cpp threadpool.o message.o processperprotocol.o
+all: threadpool.o eventscheduler.o processperprotocol.o protocol_application
+
+protocol_application: processperprotocol.o message.o threadpool.o protocol_application.cpp
 	$(CC) $(FLAGS) -o $@ $^ $(LIBS)
 
 processperprotocol.o: processperprotocol.cpp
@@ -20,4 +21,5 @@ message.o: message.cpp
 	$(CC) $(FLAGS) -o $@ -c $^
 
 clean:
-	rm -f threadpool.o eventscheduler.o processperprotocol.o processperprotocol_application
+	rm -f threadpool.o eventscheduler.o processperprotocol.o protocol_application
+
