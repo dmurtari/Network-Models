@@ -13,7 +13,6 @@
 #include "message.h"
 #include "protocolid.h"
 #include "protocol_application.h"
-#include "udp_socket.h"
 
 using namespace std;
 
