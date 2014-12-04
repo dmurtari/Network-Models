@@ -83,6 +83,5 @@ int main() {
   protocol_applications->dispatch_thread(telnet_app, (void*) ppp);
   protocol_applications->dispatch_thread(rdp_app, (void*) ppp);
   protocol_applications->dispatch_thread(dns_app, (void*) ppp);
-
-  while(1){}
+  
 }
