@@ -1,6 +1,6 @@
 #include "processperprotocol.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 using namespace std;
 
@@ -47,6 +47,7 @@ ProcessPerProtocol::ProcessPerProtocol() {
   protocol_threads->dispatch_thread(udp_send, (void*) this);
   protocol_threads->dispatch_thread(ip_send, (void*) this);
   protocol_threads->dispatch_thread(ethernet_send, (void*) this);
+  protocol_threads->dispatch_thread(receive_message, (void*) this);
 }
 
 void ProcessPerProtocol::application_send_msg(send_message message, 
@@ -366,12 +367,75 @@ void ProcessPerProtocol::ip_send(void* arg) {
   }
 }
 
+void ProcessPerProtocol::receive_message(void* arg) {
+  ProcessPerProtocol* ppp = (ProcessPerProtocol*) arg;
+  struct sockaddr_in myaddr;  /* our address */
+  struct sockaddr_in remaddr; /* remote address */
+  socklen_t addrlen = sizeof(remaddr);    /* length of addresses */
+  int recvlen;      /* # bytes received */
+  int fd;           /* our socket */
+  unsigned char buf[512]; /* receive buffer */
+
+  /* create a UDP socket */
+
+  if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    perror("cannot create socket\n");
+  }
+
+  /* bind the socket to any valid IP address and a specific port */
+
+  memset((char *)&myaddr, 0, sizeof(myaddr));
+  myaddr.sin_family = AF_INET;
+  myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  myaddr.sin_port = htons(SERVICE_PORT);
+
+  if (bind(fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
+    perror("bind failed");
+  }
+
+  /* now loop, receiving data and printing what we received */
+  for (;;) {
+    printf("waiting on port %d\n", SERVICE_PORT);
+    recvlen = recvfrom(fd, buf, 512, 0, (struct sockaddr *)&remaddr, &addrlen);
+    printf("received %d bytes\n", recvlen);
+    if (recvlen > 0) {
+      buf[recvlen] = 0;
+      printf("received message: \"%s\"\n", buf);
+    }
+  }
+}
+
 void ProcessPerProtocol::ethernet_send(void* arg) {
   ProcessPerProtocol* ppp = (ProcessPerProtocol*) arg;
+  struct sockaddr_in myaddr, remaddr;
+  int udp_sock;
+  char *server = "127.0.0.1"; 
 
+  /* Create a socket */
+
+  if ((udp_sock=socket(AF_INET, SOCK_DGRAM, 0))==-1)
+    printf("socket created\n");
+
+  memset((char *)&myaddr, 0, sizeof(myaddr));
+  myaddr.sin_family = AF_INET;
+  myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  myaddr.sin_port = htons(0);
+
+  if (bind(udp_sock, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
+    perror("bind failed");
+  }       
+
+  memset((char *) &remaddr, 0, sizeof(remaddr));
+  remaddr.sin_family = AF_INET;
+  remaddr.sin_port = htons(SERVICE_PORT);
+  if (inet_aton(server, &remaddr.sin_addr)==0) {
+    fprintf(stderr, "inet_aton() failed\n");
+  }
+  
   while(1) {
     send_message* read_from_pipe = new send_message;
     Message* read_message;
+    char message_buffer[512];
 
     if(DEBUG) { cout << "Locking and reading from ethernet Send" << endl; }
     pthread_mutex_unlock(&ppp->ethernet_send_pipe.pipe_mutex);
@@ -393,9 +457,11 @@ void ProcessPerProtocol::ethernet_send(void* arg) {
     if(DEBUG) { cout << "Adding new ethernet header to message" << endl; }
     read_message->msgAddHdr((char*) head, sizeof(ethernet_header));
 
-    if(DEBUG) {cout << "Creating message struct to send from ETHERNET" << endl; }
-    send_message ethernet_send_message;
-    ethernet_send_message.protocol_id = ETHERNET;
-    ethernet_send_message.message = read_message;
+    cout << "Sending over ethernet" << endl;
+    memset(&message_buffer, 0, sizeof(message_buffer));
+    read_message->msgFlat(message_buffer);
+    if(sendto(udp_sock, message_buffer, read_message->msgLen(), 0, 
+              (struct sockaddr *)&remaddr, sizeof(remaddr)) < 0)
+      printf("Error with sendto %s\n", strerror(errno));
   }
 }

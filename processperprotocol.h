@@ -13,6 +13,7 @@
 #include "message.h"
 #include "protocolid.h"
 #include "protocol_application.h"
+#include "udp_socket.h"
 
 using namespace std;
 
@@ -54,6 +55,7 @@ class ProcessPerProtocol {
     static void ip_receive(void* arg);
     static void ethernet_send(void* arg);
     static void ethernet_receive(void* arg);
+    static void receive_message(void* arg);
 
     pipe_container ftp_receive_pipe, telnet_receive_pipe, rdp_receive_pipe,
                    dns_receive_pipe;

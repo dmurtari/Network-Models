@@ -1,6 +1,8 @@
 #include "protocolid.h"
 #include "message.h"
 
+#define SERVICE_PORT 12153
+
 /* Container to hold pointer to message and the protocol sending the 
    message */
 struct send_message {
