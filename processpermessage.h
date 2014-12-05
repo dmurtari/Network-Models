@@ -24,21 +24,21 @@ class ProcessPerMessage {
   private:
     ThreadPool* message_threads;
 
-    static void ftp_send(Message* message, int higher_level_protocol_id);
+    static void ftp_send(Message* message, int higher_level_protocol);
     static void ftp_receive(Message* message);
-    static void telnet_send(Message* message, int higher_level_protocol_id);
+    static void telnet_send(Message* message, int higher_level_protocol);
     static void telnet_receive(Message* message);
-    static void rdp_send(Message* message, int higher_level_protocol_id);
+    static void rdp_send(Message* message, int higher_level_protocol);
     static void rdp_receive(Message* message);
-    static void dns_send(Message* message, int higher_level_protocol_id);
+    static void dns_send(Message* message, int higher_level_protocol);
     static void dns_receive(Message* message);
-    static void tcp_send(Message* message, int higher_level_protocol_id);
+    static void tcp_send(Message* message, int higher_level_protocol);
     static void tcp_receive(Message* message);
-    static void udp_send(Message* message, int higher_level_protocol_id);
+    static void udp_send(Message* message, int higher_level_protocol);
     static void udp_receive(Message* message);
-    static void ip_send(Message* message, int higher_level_protocol_id);
+    static void ip_send(Message* message, int higher_level_protocol);
     static void ip_receive(Message* message);
-    static void ethernet_send(Message* message, int higher_level_protocol_id);
+    static void ethernet_send(Message* message, int higher_level_protocol);
     static void ethernet_receive(Message* message);
     static void receive_message(void* arg);
 };

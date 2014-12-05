@@ -28,11 +28,18 @@ void ProcessPerMessage::ftp_send(Message* message, int higher_level_protocol) {
   ftp_header* header = new ftp_header;
   header->higher_level_protocol = higher_level_protocol;
   header->message_length = message->msgLen();
-
   message->msgAddHdr((char*) header, sizeof(ftp_header));
 
   if(DEBUG) { cout << "Done attaching FTP header, sending to TCP" << endl; }
   tcp_send(message, FTP);
+}
+
+void ProcessPerMessage::ftp_receive(Message* message) {
+    char received[1024];
+
+    message->msgStripHdr(sizeof(ftp_header));
+    message->msgFlat(received);
+    cout << "Received message on FTP: " << received << endl;
 }
 
 void ProcessPerMessage::telnet_send(Message* message, int higher_level_protocol) {
@@ -48,6 +55,14 @@ void ProcessPerMessage::telnet_send(Message* message, int higher_level_protocol)
   tcp_send(message, TELNET);
 }
 
+void ProcessPerMessage::telnet_receive(Message* message) {
+    char received[1024];
+
+    message->msgStripHdr(sizeof(telnet_header));
+    message->msgFlat(received);
+    cout << "Received message on telnet: " << received << endl;
+}
+
 void ProcessPerMessage::rdp_send(Message* message, int higher_level_protocol) {
   if(DEBUG) { cout << "Received RDP message, attaching RDP header" << endl; }
   
@@ -59,6 +74,14 @@ void ProcessPerMessage::rdp_send(Message* message, int higher_level_protocol) {
 
   if(DEBUG) { cout << "Done attaching RDP header, sending to UDP" << endl; }
   udp_send(message, RDP);
+}
+
+void ProcessPerMessage::rdp_receive(Message* message) {
+    char received[1024];
+
+    message->msgStripHdr(sizeof(rdp_header));
+    message->msgFlat(received);
+    cout << "Received message on RDP: " << received << endl;
 }
 
 void ProcessPerMessage::dns_send(Message* message, int higher_level_protocol) {
@@ -74,6 +97,14 @@ void ProcessPerMessage::dns_send(Message* message, int higher_level_protocol) {
   udp_send(message, DNS);
 }
 
+void ProcessPerMessage::dns_receive(Message* message) {
+    char received[1024];
+
+    message->msgStripHdr(sizeof(dns_header));
+    message->msgFlat(received);
+    cout << "Received message on DNS: " << received << endl;
+}
+
 void ProcessPerMessage::tcp_send(Message* message, int higher_level_protocol) {
   if(DEBUG) { cout << "Received TCP message, attaching TCP header" << endl; }
   
@@ -85,6 +116,27 @@ void ProcessPerMessage::tcp_send(Message* message, int higher_level_protocol) {
 
   if(DEBUG) { cout << "Done attaching TCP header, sending to IP" << endl; }
   ip_send(message, TCP);
+}
+
+void ProcessPerMessage::tcp_receive(Message* message) {
+  int higher_level_protocol;
+
+  if(DEBUG) { cout << "Received TCP message, stripping TCP header" << endl; }
+
+  tcp_header* stripped_header = (tcp_header *)message->msgStripHdr(sizeof(tcp_header));
+  higher_level_protocol = stripped_header->higher_level_protocol;
+
+  if(DEBUG) { cout << "Stripped header with hlp: " << higher_level_protocol << endl; }
+  switch(higher_level_protocol){
+    case FTP:
+      ftp_receive(message);
+      break;
+    case TELNET:
+      telnet_receive(message);
+      break;
+    default:
+      cout << "Higher level prococol " << higher_level_protocol << " is invalid" << endl;
+  }
 }
 
 void ProcessPerMessage::udp_send(Message* message, int higher_level_protocol) {
@@ -100,6 +152,27 @@ void ProcessPerMessage::udp_send(Message* message, int higher_level_protocol) {
   ip_send(message, UDP);
 }
 
+void ProcessPerMessage::udp_receive(Message* message) {
+  int higher_level_protocol;
+
+  if(DEBUG) { cout << "Received UDP message, stripping UDP header" << endl; }
+
+  udp_header* stripped_header = (udp_header *)message->msgStripHdr(sizeof(udp_header));
+  higher_level_protocol = stripped_header->higher_level_protocol;
+
+  if(DEBUG) { cout << "Stripped header with hlp: " << higher_level_protocol << endl; }
+  switch(higher_level_protocol){
+    case RDP:
+      rdp_receive(message);
+      break;
+    case DNS:
+      dns_receive(message);
+      break;
+    default:
+      cout << "Higher level prococol " << higher_level_protocol << " is invalid" << endl;
+  }
+}
+
 void ProcessPerMessage::ip_send(Message* message, int higher_level_protocol) {
   if(DEBUG) { cout << "Received IP message, attaching IP header" << endl; }
   
@@ -113,6 +186,27 @@ void ProcessPerMessage::ip_send(Message* message, int higher_level_protocol) {
   ethernet_send(message, IP);
 }
 
+void ProcessPerMessage::ip_receive(Message* message) {
+  int higher_level_protocol;
+
+  if(DEBUG) { cout << "Received IP message, stripping IP header" << endl; }
+
+  ip_header* stripped_header = (ip_header *)message->msgStripHdr(sizeof(ip_header));
+  higher_level_protocol = stripped_header->higher_level_protocol;
+
+  if(DEBUG) { cout << "Stripped header with hlp: " << higher_level_protocol << endl; }
+  switch(higher_level_protocol){
+    case TCP:
+      tcp_receive(message);
+      break;
+    case UDP:
+      udp_receive(message);
+      break;
+    default:
+      cout << "Higher level prococol " << higher_level_protocol << " is invalid" << endl;
+  }
+}
+
 void ProcessPerMessage::ethernet_send(Message* message, int higher_level_protocol) {
   if(DEBUG) { cout << "Received ethernet message, attaching ethernet header" << endl; }
   
@@ -122,6 +216,25 @@ void ProcessPerMessage::ethernet_send(Message* message, int higher_level_protoco
 
   message->msgAddHdr((char*) header, sizeof(ethernet_header));
 
-  if(DEBUG) { cout << "Done attaching ethernet header" << endl; }
+  if(DEBUG) { cout << "Done attaching ethernet header: " << header->higher_level_protocol << endl; }
   cout << "message->msgLen(): " << message->msgLen() << endl;
+  ethernet_receive(message);
+}
+
+void ProcessPerMessage::ethernet_receive(Message* message) {
+  int higher_level_protocol;
+
+  if(DEBUG) { cout << "Received ethernet message, stripping ethernet header" << endl; }
+
+  ethernet_header* stripped_header = (ethernet_header *)message->msgStripHdr(sizeof(ethernet_header));
+  higher_level_protocol = stripped_header->higher_level_protocol;
+
+  if(DEBUG) { cout << "Stripped header with hlp: " << higher_level_protocol << endl; }
+  switch(higher_level_protocol){
+    case IP:
+      ip_receive(message);
+      break;
+    default:
+      cout << "Higher level prococol " << higher_level_protocol << " is invalid" << endl;
+  }
 }
