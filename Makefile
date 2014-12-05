@@ -27,5 +27,5 @@ message.o: message.cpp
 	$(CC) $(FLAGS) -o $@ -c $^
 
 clean:
-	rm -f threadpool.o eventscheduler.o processperprotocol.o protocol_application
+	rm -f threadpool.o eventscheduler.o processperprotocol.o protocol_application message_application
 
