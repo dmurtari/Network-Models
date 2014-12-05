@@ -74,15 +74,17 @@ void dns_app(void* arg) {
 
 int main() {
   ThreadPool* message_applications = new ThreadPool(8);
-  ProcessPerProtocol* ppp1 = new ProcessPerProtocol("32001", "32002");
-  ProcessPerProtocol* ppp2 = new ProcessPerProtocol("32002", "32001");
-
-  sleep(1);
+  ProcessPerProtocol* ppp1 = new ProcessPerProtocol("12123", "12124");
+  ProcessPerProtocol* ppp2 = new ProcessPerProtocol("12124", "12123");
 
   if(DEBUG) { cout << "Dispatching application threads" << endl; }
   message_applications->dispatch_thread(ftp_app, (void*) ppp1);
+  message_applications->dispatch_thread(ftp_app, (void*) ppp2);
   message_applications->dispatch_thread(telnet_app, (void*) ppp1);
+  message_applications->dispatch_thread(telnet_app, (void*) ppp2);
   message_applications->dispatch_thread(rdp_app, (void*) ppp1);
+  message_applications->dispatch_thread(rdp_app, (void*) ppp2);
   message_applications->dispatch_thread(dns_app, (void*) ppp1);
+  message_applications->dispatch_thread(dns_app, (void*) ppp2);
   while(1);
 }
