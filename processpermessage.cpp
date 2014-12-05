@@ -2,9 +2,13 @@
 
 #define DEBUG 0
 
-ProcessPerMessage::ProcessPerMessage() {
+ProcessPerMessage::ProcessPerMessage(char* input, char* output) {
   if(DEBUG) { cout << "Contructing ProcessPerMessage Object" << endl; }
   message_threads = new ThreadPool(10);
+  input_port = input;
+  output_port = output;
+
+  message_threads->dispatch_thread(receive_message, (void*) this);
 }
 
 ProcessPerMessage::~ProcessPerMessage() {
@@ -222,18 +226,39 @@ void ProcessPerMessage::ip_receive(Message* message) {
 void ProcessPerMessage::ethernet_send(Message* message, int higher_level_protocol) {
   if(DEBUG) { cout << "Received ethernet message, attaching ethernet header" << endl; }
   
+  struct sockaddr_in servaddr;
+  struct hostent *phe;
+  char* host = "127.0.0.1";
+
+  char* message_buffer = new char[1024];
+
   ethernet_header* header = new ethernet_header;
   header->higher_level_protocol = higher_level_protocol;
   header->message_length = message->msgLen();
 
   message->msgAddHdr((char*) header, sizeof(ethernet_header));
-
+  
   if(DEBUG) { cout << "Done attaching ethernet header: " << header->higher_level_protocol << endl; }
-  ethernet_receive(message);
+  
+  memset(&servaddr, 0, sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_port = htons((unsigned short)atoi(output_port));
+
+  if((phe = gethostbyname(host)) ) {
+      memcpy(&servaddr.sin_addr, phe->h_addr, phe->h_length);
+  } else if((servaddr.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE)
+      exit(0);
+
+  message->msgFlat(message_buffer);
+  int upd_sock = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sendto(upd_sock, message_buffer, message->msgLen(), 0,
+             (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
+      printf("Error with sendto %s\n", strerror(errno));
 }
 
-void ProcessPerMessage::ethernet_receive(Message* message) {
+void ProcessPerMessage::ethernet_receive(void* arg) {
   int higher_level_protocol;
+  Message* message = (Message*) arg;
 
   if(DEBUG) { cout << "Received ethernet message, stripping ethernet header" << endl; }
 
@@ -246,6 +271,39 @@ void ProcessPerMessage::ethernet_receive(Message* message) {
       ip_receive(message);
       break;
     default:
-      cout << "Higher level prococol " << higher_level_protocol << " is invalid" << endl;
+      cout << "Higher level prococol " << higher_level_protocol << " is invalid from ethernet" << endl;
+  }
+}
+
+void ProcessPerMessage::receive_message(void *arg) {
+  ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
+  struct sockaddr_in myaddr;
+  struct sockaddr_in remaddr; 
+  socklen_t addrlen = sizeof(remaddr);  
+  int recvlen;     
+  int udp_sock;           
+
+  /* create a UDP socket */
+  if ((udp_sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    perror("cannot create socket\n");
+  }
+
+  /* bind the socket to any valid IP address and a specific port */
+  memset((char *)&myaddr, 0, sizeof(myaddr));
+  myaddr.sin_family = AF_INET;
+  myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  myaddr.sin_port = htons((unsigned short)atoi(ppm->output_port));
+
+  if (bind(udp_sock, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
+    perror("bind failed");
+  }
+
+  while(1) {
+    char* message_buffer = new char[1024];
+    memset(message_buffer, 0, 1024);
+  
+    recvlen = recvfrom(udp_sock, message_buffer, 1024, 0, (struct sockaddr *)&myaddr, &addrlen);
+    Message* message = new Message(message_buffer, recvlen);
+    ppm->message_threads->dispatch_thread(ethernet_receive, (void*) message);
   }
 }

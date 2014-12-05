@@ -54,7 +54,7 @@ void dns_app(void* arg) {
 
 int main() {
   ThreadPool* message_applications = new ThreadPool(4);
-  ProcessPerMessage* ppm = new ProcessPerMessage();
+  ProcessPerMessage* ppm = new ProcessPerMessage("12123", "12124");
 
   sleep(1);
 
