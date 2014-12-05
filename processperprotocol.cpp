@@ -1,6 +1,6 @@
 #include "processperprotocol.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 using namespace std;
 
@@ -8,7 +8,6 @@ ProcessPerProtocol::ProcessPerProtocol(char* input, char* output) {
 
   if(DEBUG) { cout << "Creating ThreadPool" << endl; }
   protocol_threads = new ThreadPool(17);
-  pthread_mutex_init(&print_mutex, NULL);
   input_port = input;
   output_port = output;
 
@@ -160,9 +159,7 @@ void ProcessPerProtocol::ftp_receive(void* arg) {
     received_message->msgStripHdr(sizeof(ftp_header));
     received_message->msgFlat(received_message_buffer);
 
-    pthread_mutex_lock(&ppp->print_mutex);
-    cout << "Received message using FTP: " << received_message_buffer << endl;
-    pthread_mutex_unlock(&ppp->print_mutex);
+    printf("Message received over FTP: %s\n", received_message_buffer);
 
     delete received_message_buffer;
   }
@@ -226,9 +223,7 @@ void ProcessPerProtocol::telnet_receive(void* arg) {
     received_message->msgStripHdr(sizeof(telnet_header));
     received_message->msgFlat(received_message_buffer);
   
-    pthread_mutex_lock(&ppp->print_mutex);
-    cout << "Received message using telnet: " << received_message_buffer << endl;
-    pthread_mutex_unlock(&ppp->print_mutex);
+    printf("Message received over telnet: %s\n", received_message_buffer);
 
     delete received_message_buffer;
   }
@@ -292,9 +287,7 @@ void ProcessPerProtocol::rdp_receive(void* arg) {
     received_message->msgStripHdr(sizeof(rdp_header));
     received_message->msgFlat(received_message_buffer);
 
-    pthread_mutex_lock(&ppp->print_mutex);
-    cout << "Received message using RDP: " << received_message_buffer << endl;
-    
+    printf("Message received over RDP: %s\n", received_message_buffer);
 
     delete received_message_buffer;
   }
@@ -358,9 +351,7 @@ void ProcessPerProtocol::dns_receive(void* arg) {
     received_message->msgStripHdr(sizeof(dns_header));
     received_message->msgFlat(received_message_buffer);
 
-    pthread_mutex_lock(&ppp->print_mutex);
-    cout << "Received message using DNS: " << received_message_buffer << endl;
-    pthread_mutex_unlock(&ppp->print_mutex);
+    printf("Message received over DNS: %s\n", received_message_buffer);    
 
     delete received_message_buffer;
   }
@@ -436,13 +427,14 @@ void ProcessPerProtocol::tcp_receive(void* arg) {
         write(ppp->ftp_receive_pipe.pipes[1], (char *) &tcp_message, sizeof(send_message));
         pthread_mutex_unlock(&ppp->ftp_receive_pipe.pipe_mutex);
         if(DEBUG) { cout << "Delivered message to FTP receive" << endl; }
+        break;
       case TELNET:
         if(DEBUG) { cout << "Delivering message to TELNET receive" << endl; }
         pthread_mutex_lock(&ppp->telnet_receive_pipe.pipe_mutex);
         write(ppp->telnet_receive_pipe.pipes[1], (char *) &tcp_message, sizeof(send_message));
         pthread_mutex_unlock(&ppp->telnet_receive_pipe.pipe_mutex);
         if(DEBUG) { cout << "Delivered message to TELNET receive" << endl; }
-      
+        break;
     }
   }
 }
@@ -517,13 +509,14 @@ void ProcessPerProtocol::udp_receive(void* arg) {
         write(ppp->rdp_receive_pipe.pipes[1], (char *) &udp_message, sizeof(send_message));
         pthread_mutex_unlock(&ppp->rdp_receive_pipe.pipe_mutex);
         if(DEBUG) { cout << "Delivered message to RDP receive" << endl; }
+        break;
       case DNS:
         if(DEBUG) { cout << "Delivering message to DNS receive" << endl; }
         pthread_mutex_lock(&ppp->dns_receive_pipe.pipe_mutex);
         write(ppp->dns_receive_pipe.pipes[1], (char *) &udp_message, sizeof(send_message));
         pthread_mutex_unlock(&ppp->dns_receive_pipe.pipe_mutex);
         if(DEBUG) { cout << "Delivered message to DNS receive" << endl; }
-      
+        break;   
     }
   }
 }
@@ -598,12 +591,14 @@ void ProcessPerProtocol::ip_receive(void* arg) {
         write(ppp->tcp_receive_pipe.pipes[1], (char *) &ip_message, sizeof(send_message));
         pthread_mutex_unlock(&ppp->tcp_receive_pipe.pipe_mutex);
         if(DEBUG) { cout << "Delivered message to TCP receive" << endl; }
+        break;
       case UDP:
         if(DEBUG) { cout << "Delivering message to UDP receive" << endl; }
         pthread_mutex_lock(&ppp->udp_receive_pipe.pipe_mutex);
         write(ppp->udp_receive_pipe.pipes[1], (char *) &ip_message, sizeof(send_message));
         pthread_mutex_unlock(&ppp->udp_receive_pipe.pipe_mutex);
         if(DEBUG) { cout << "Delivered message to UDP receive" << endl; }
+        break;
       
     }
   }
@@ -612,35 +607,32 @@ void ProcessPerProtocol::ip_receive(void* arg) {
 void ProcessPerProtocol::receive_message(void* arg) {
   ProcessPerProtocol* ppp = (ProcessPerProtocol*) arg;
   struct sockaddr_in myaddr;
-  struct sockaddr_in remaddr; 
-  socklen_t addrlen = sizeof(remaddr);  
+  socklen_t addrlen = sizeof(myaddr);  
   int recvlen;     
-  int fd;           
-  char buf[1024]; 
+  int udp_sock;    
 
   /* create a UDP socket */
-
-  if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+  if ((udp_sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror("cannot create socket\n");
   }
 
   /* bind the socket to any valid IP address and a specific port */
-
   memset((char *)&myaddr, 0, sizeof(myaddr));
   myaddr.sin_family = AF_INET;
   myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   myaddr.sin_port = htons((unsigned short)atoi(ppp->input_port));
 
-  if (bind(fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
+  if (bind(udp_sock, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
     perror("receive bind failed");
   }
 
-  cout << "Listening on " << ppp->input_port << endl;
   /* now loop, receiving data and printing what we received */
   while(1) {
-    recvlen = recvfrom(fd, buf, 1024, 0, (struct sockaddr *)&remaddr, &addrlen);
-    Message* received_message = new Message(buf, recvlen);
-    cout << "Received message over ethernet" << endl;
+    char* message_buffer = new char[1024];
+    memset(message_buffer, 0, 1024);
+
+    recvlen = recvfrom(udp_sock, message_buffer, 1024, 0, (struct sockaddr *)&myaddr, &addrlen);
+    Message* received_message = new Message(message_buffer, recvlen);
 
     send_message ethernet_message;
     ethernet_message.protocol_id = ETHERNET;
@@ -656,35 +648,27 @@ void ProcessPerProtocol::receive_message(void* arg) {
 
 void ProcessPerProtocol::ethernet_send(void* arg) {
   ProcessPerProtocol* ppp = (ProcessPerProtocol*) arg;
-  struct sockaddr_in myaddr, remaddr;
+  struct sockaddr_in servaddr;
+  struct hostent *phe;
   int udp_sock;
-  char *server = "127.0.0.1"; 
+  char *host = "127.0.0.1"; 
 
-  /* Create a socket */
+  /* Create a socket */  
+  memset(&servaddr, 0, sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_port = htons((unsigned short)atoi(ppp->output_port));
 
-  if ((udp_sock=socket(AF_INET, SOCK_DGRAM, 0))==-1)
-    printf("socket created\n");
+  if((phe = gethostbyname(host)) ) {
+      memcpy(&servaddr.sin_addr, phe->h_addr, phe->h_length);
+  } else if((servaddr.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE)
+      exit(0);
 
-  memset((char *)&myaddr, 0, sizeof(myaddr));
-  myaddr.sin_family = AF_INET;
-  myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  myaddr.sin_port = htons((unsigned short)atoi(ppp->output_port));
-
-  if (bind(udp_sock, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
-    perror("send bind failed");
-  }       
-
-  memset((char *) &remaddr, 0, sizeof(remaddr));
-  remaddr.sin_family = AF_INET;
-  remaddr.sin_port = htons(SERVICE_PORT);
-  if (inet_aton(server, &remaddr.sin_addr)==0) {
-    fprintf(stderr, "inet_aton() failed\n");
-  }
+  udp_sock = socket(AF_INET, SOCK_DGRAM, 0);
   
   while(1) {
     send_message* read_from_pipe = new send_message;
     Message* read_message;
-    char message_buffer[1024];
+    char* message_buffer = new char[1024];
 
     if(DEBUG) { cout << "Locking and reading from ethernet Send" << endl; }
     pthread_mutex_unlock(&ppp->ethernet_send_pipe.pipe_mutex);
@@ -706,12 +690,10 @@ void ProcessPerProtocol::ethernet_send(void* arg) {
     if(DEBUG) { cout << "Adding new ethernet header to message" << endl; }
     read_message->msgAddHdr((char*) head, sizeof(ethernet_header));
 
-    memset(&message_buffer, 0, sizeof(message_buffer));
-
-    cout << "Sending message over ethernet on port" << ppp->output_port << endl;
+    memset(message_buffer, 0, 1024);
     read_message->msgFlat(message_buffer);
     if(sendto(udp_sock, message_buffer, read_message->msgLen(), 0, 
-              (struct sockaddr *)&remaddr, sizeof(remaddr)) < 0)
+              (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
       printf("Error with sendto %s\n", strerror(errno));
   }
 }

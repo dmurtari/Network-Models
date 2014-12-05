@@ -2,6 +2,8 @@
 #include <sys/socket.h>
 #include <sys/errno.h>
 #include <sys/time.h>
+#include <pthread.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
@@ -28,8 +30,6 @@ class ProcessPerProtocol {
       int pipes[2];
       pthread_mutex_t pipe_mutex;
     };
-
-    pthread_mutex_t print_mutex;
 
     /* Applications need some way to initiate commmunication */
     void application_send_msg(send_message message, int protocol_id);
