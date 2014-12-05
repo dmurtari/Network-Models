@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void ftp_app(void* arg) {
+void* ftp_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
   for(int i = 0; i < 100; i++) {
@@ -16,7 +16,7 @@ void ftp_app(void* arg) {
   }
 }
 
-void telnet_app(void* arg) {
+void* telnet_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
   for(int i = 0; i < 100; i++) {
@@ -28,7 +28,7 @@ void telnet_app(void* arg) {
   }
 }
 
-void rdp_app(void* arg) {
+void* rdp_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
   for(int i = 0; i < 100; i++) {
@@ -40,7 +40,7 @@ void rdp_app(void* arg) {
   }
 }
 
-void dns_app(void* arg) {
+void* dns_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
   for(int i = 0; i < 100; i++) {
@@ -53,18 +53,29 @@ void dns_app(void* arg) {
 }
 
 int main() {
-  ThreadPool* message_applications = new ThreadPool(8);
+  pthread_t message_applications[8];
+
   ProcessPerMessage* ppm1 = new ProcessPerMessage("12123", "12124");
   ProcessPerMessage* ppm2 = new ProcessPerMessage("12124", "12123");
 
   if(DEBUG) { cout << "Dispatching application threads" << endl; }
-  message_applications->dispatch_thread(ftp_app, (void*) ppm1);
-  message_applications->dispatch_thread(ftp_app, (void*) ppm2);
-  message_applications->dispatch_thread(telnet_app, (void*) ppm1);
-  message_applications->dispatch_thread(telnet_app, (void*) ppm2);
-  message_applications->dispatch_thread(rdp_app, (void*) ppm1);
-  message_applications->dispatch_thread(rdp_app, (void*) ppm2);
-  message_applications->dispatch_thread(dns_app, (void*) ppm1);
-  message_applications->dispatch_thread(dns_app, (void*) ppm2);  
-  while(1){}
+  pthread_create(&message_applications[0], NULL, ftp_app, (void*) ppm1);
+  pthread_create(&message_applications[1], NULL, ftp_app, (void*) ppm2);
+  pthread_create(&message_applications[2], NULL, telnet_app, (void*) ppm1);
+  pthread_create(&message_applications[3], NULL, telnet_app, (void*) ppm2);
+  pthread_create(&message_applications[4], NULL, rdp_app, (void*) ppm1);
+  pthread_create(&message_applications[5], NULL, rdp_app, (void*) ppm2);
+  pthread_create(&message_applications[6], NULL, dns_app, (void*) ppm1);
+  pthread_create(&message_applications[7], NULL, dns_app, (void*) ppm2);
+  
+  pthread_join(message_applications[0], NULL);
+  pthread_join(message_applications[1], NULL);
+  pthread_join(message_applications[2], NULL);
+  pthread_join(message_applications[3], NULL);
+  pthread_join(message_applications[4], NULL);
+  pthread_join(message_applications[5], NULL);
+  pthread_join(message_applications[6], NULL);
+  pthread_join(message_applications[7], NULL);
+
+  return 1;
 }
