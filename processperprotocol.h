@@ -1,3 +1,6 @@
+#ifndef _PROCESSPERPROTOCOL_
+#define _PROCESSPERPROTOCOL_
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/errno.h>
@@ -69,3 +72,5 @@ class ProcessPerProtocol {
     pipe_container ip_send_pipe, ip_receive_pipe;
     pipe_container ethernet_send_pipe, ethernet_receive_pipe;
 };
+
+#endif

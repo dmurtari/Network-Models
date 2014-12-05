@@ -1,3 +1,6 @@
+#ifndef _PROCESSPERMESSAGE_
+#define _PROCESSPERMESSAGE_
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/errno.h>
@@ -44,3 +47,5 @@ class ProcessPerMessage {
     static void ethernet_receive(void* arg);
     static void receive_message(void* arg);
 };
+
+#endif

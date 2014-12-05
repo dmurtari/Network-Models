@@ -1,3 +1,6 @@
+#ifndef _MESSAGE_
+#define _MESSAGE_
+
 #include <list>
 #include <iterator>
 #include <memory.h>
@@ -20,3 +23,5 @@ private:
     size_t msglen;
     char *msg_content;
 };
+
+#endif

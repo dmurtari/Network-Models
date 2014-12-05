@@ -1,3 +1,6 @@
+#ifndef _PROTOCOLID_
+#define _PROTOCOLID_
+
 #define ETHERNET 1
 #define IP 2
 #define TCP 3
@@ -56,3 +59,5 @@ struct ethernet_header {
   char other_info[8];
   int message_length;           
 };
+
+#endif
