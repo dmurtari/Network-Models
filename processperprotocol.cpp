@@ -1,6 +1,6 @@
 #include "processperprotocol.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 using namespace std;
 
@@ -18,6 +18,7 @@ ProcessPerProtocol::ProcessPerProtocol(char* input, char* output) {
   pipe(rdp_send_pipe.pipes); pipe(rdp_receive_pipe.pipes);
   pipe(dns_send_pipe.pipes); pipe(dns_receive_pipe.pipes);
   pipe(tcp_send_pipe.pipes); pipe(tcp_receive_pipe.pipes);
+  pipe(udp_send_pipe.pipes); pipe(udp_receive_pipe.pipes);
   pipe(ip_send_pipe.pipes);  pipe(ip_receive_pipe.pipes);
   pipe(ethernet_send_pipe.pipes); pipe(ethernet_receive_pipe.pipes);
 

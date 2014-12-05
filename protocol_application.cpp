@@ -42,14 +42,14 @@ void rdp_app(void* arg) {
   ProcessPerProtocol* ppp = (ProcessPerProtocol*) arg;
 
   for(int i = 0; i < 100; i++) {
-    char message_contents[] = "This is a RDP message";
+    char message_contents[] = "This is an RDP message";
     Message* rdp_message = new Message(message_contents, 100);
     send_message rdp_container;
 
     rdp_container.protocol_id = APPLICATION;
     rdp_container.message = rdp_message;
 
-    if(DEBUG) { cout << "Sending RDP message " << i << endl; }
+    if(DEBUG) { cout << "Sending rdp message " << i << endl; }
     ppp->application_send_msg(rdp_container, RDP); 
     usleep(100);
   }
@@ -80,8 +80,8 @@ int main() {
   sleep(1);
 
   if(DEBUG) { cout << "Dispatching application threads" << endl; }
-  // message_applications->dispatch_thread(ftp_app, (void*) ppp1);
-  // message_applications->dispatch_thread(telnet_app, (void*) ppp1);
+  message_applications->dispatch_thread(ftp_app, (void*) ppp1);
+  message_applications->dispatch_thread(telnet_app, (void*) ppp1);
   message_applications->dispatch_thread(rdp_app, (void*) ppp1);
   message_applications->dispatch_thread(dns_app, (void*) ppp1);
   while(1);
