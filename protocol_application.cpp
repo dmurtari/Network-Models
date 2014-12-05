@@ -104,13 +104,15 @@ void ftp_app(void* arg) {
 }
 
 int main() {
-  ThreadPool* message_applications = new ThreadPool(4);
-  ProcessPerProtocol* ppp = new ProcessPerProtocol();
+  ThreadPool* message_applications = new ThreadPool(8);
+  ProcessPerProtocol* ppp1 = new ProcessPerProtocol("32001", "32002");
+  ProcessPerProtocol* ppp2 = new ProcessPerProtocol("32002", "32001");
 
   sleep(1);
 
   if(DEBUG) { cout << "Dispatching application threads" << endl; }
-  message_applications->dispatch_thread(ftp_app, (void*) ppp);
+  message_applications->dispatch_thread(ftp_app, (void*) ppp1);
+  message_applications->dispatch_thread(ftp_app, (void*) ppp2);
   // message_applications->dispatch_thread(telnet_app, (void*) ppp);
   // message_applications->dispatch_thread(rdp_app, (void*) ppp);
   // message_applications->dispatch_thread(dns_app, (void*) ppp);

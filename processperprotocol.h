@@ -19,7 +19,7 @@ using namespace std;
 class ProcessPerProtocol {
   public: 
     /* Constructor and destructor */
-    ProcessPerProtocol();
+    ProcessPerProtocol(char* input, char* output);
     ~ProcessPerProtocol();
 
     /* Container struct to allow a mutex to be associated with a pipe. Send and
@@ -38,6 +38,10 @@ class ProcessPerProtocol {
   private:
     /* Thread pool to contain threads for each protocol */
     ThreadPool* protocol_threads;
+
+    /* Input and output ports for communication between ethernets */
+    char* input_port;
+    char* output_port;
 
     /* Each protocol needs a way to send and receive messages from its pipes */
     static void ftp_send(void* arg);

@@ -4,12 +4,14 @@
 
 using namespace std;
 
-ProcessPerProtocol::ProcessPerProtocol() {
+ProcessPerProtocol::ProcessPerProtocol(char* input, char* output) {
 
   if(DEBUG) { cout << "Creating ThreadPool" << endl; }
   protocol_threads = new ThreadPool(17);
   pthread_mutex_init(&print_mutex, NULL);
-  
+  input_port = input;
+  output_port = output;
+
   /* Create pipes */
   if(DEBUG) { cout << "Creating Pipes" << endl; }
   pipe(ftp_send_pipe.pipes); pipe(ftp_receive_pipe.pipes);
@@ -627,16 +629,18 @@ void ProcessPerProtocol::receive_message(void* arg) {
   memset((char *)&myaddr, 0, sizeof(myaddr));
   myaddr.sin_family = AF_INET;
   myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  myaddr.sin_port = htons(SERVICE_PORT);
+  myaddr.sin_port = htons((unsigned short)atoi(ppp->input_port));
 
   if (bind(fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
-    perror("bind failed");
+    perror("receive bind failed");
   }
 
+  cout << "Listening on " << ppp->input_port << endl;
   /* now loop, receiving data and printing what we received */
   while(1) {
     recvlen = recvfrom(fd, buf, 1024, 0, (struct sockaddr *)&remaddr, &addrlen);
     Message* received_message = new Message(buf, recvlen);
+    cout << "Received message over ethernet" << endl;
 
     send_message ethernet_message;
     ethernet_message.protocol_id = ETHERNET;
@@ -664,10 +668,10 @@ void ProcessPerProtocol::ethernet_send(void* arg) {
   memset((char *)&myaddr, 0, sizeof(myaddr));
   myaddr.sin_family = AF_INET;
   myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  myaddr.sin_port = htons(0);
+  myaddr.sin_port = htons((unsigned short)atoi(ppp->output_port));
 
   if (bind(udp_sock, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
-    perror("bind failed");
+    perror("send bind failed");
   }       
 
   memset((char *) &remaddr, 0, sizeof(remaddr));
@@ -704,6 +708,7 @@ void ProcessPerProtocol::ethernet_send(void* arg) {
 
     memset(&message_buffer, 0, sizeof(message_buffer));
 
+    cout << "Sending message over ethernet on port" << ppp->output_port << endl;
     read_message->msgFlat(message_buffer);
     if(sendto(udp_sock, message_buffer, read_message->msgLen(), 0, 
               (struct sockaddr *)&remaddr, sizeof(remaddr)) < 0)
