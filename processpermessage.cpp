@@ -51,7 +51,7 @@ void ProcessPerMessage::ftp_receive(Message* message) {
 
     message->msgStripHdr(sizeof(ftp_header));
     message->msgFlat(received);
-    cout << "Received message on FTP: " << received << endl;
+    printf("Message received over FTP: %s\n", received);
 }
 
 void ProcessPerMessage::telnet_send(Message* message, int higher_level_protocol) {
@@ -72,7 +72,7 @@ void ProcessPerMessage::telnet_receive(Message* message) {
 
     message->msgStripHdr(sizeof(telnet_header));
     message->msgFlat(received);
-    cout << "Received message on telnet: " << received << endl;
+    printf("Message received over telnet: %s\n", received);
 }
 
 void ProcessPerMessage::rdp_send(Message* message, int higher_level_protocol) {
@@ -93,7 +93,7 @@ void ProcessPerMessage::rdp_receive(Message* message) {
 
     message->msgStripHdr(sizeof(rdp_header));
     message->msgFlat(received);
-    cout << "Received message on RDP: " << received << endl;
+    printf("Message received over RDP: %s\n", received);
 }
 
 void ProcessPerMessage::dns_send(Message* message, int higher_level_protocol) {
@@ -114,7 +114,7 @@ void ProcessPerMessage::dns_receive(Message* message) {
 
     message->msgStripHdr(sizeof(dns_header));
     message->msgFlat(received);
-    cout << "Received message on DNS: " << received << endl;
+    printf("Message received over DNS: %s\n", received);
 }
 
 void ProcessPerMessage::tcp_send(Message* message, int higher_level_protocol) {

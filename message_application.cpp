@@ -7,7 +7,7 @@ using namespace std;
 void ftp_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
-  for(int i = 0; i < 1; i++) {
+  for(int i = 0; i < 100; i++) {
     char message_contents[] = "This is an FTP message";
     Message* ftp_message = new Message(message_contents, 100);
     
@@ -19,7 +19,7 @@ void ftp_app(void* arg) {
 void telnet_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
-  for(int i = 0; i < 1; i++) {
+  for(int i = 0; i < 100; i++) {
     char message_contents[] = "This is an telnet message";
     Message* telnet_message = new Message(message_contents, 100);
     
@@ -31,7 +31,7 @@ void telnet_app(void* arg) {
 void rdp_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
-  for(int i = 0; i < 1; i++) {
+  for(int i = 0; i < 100; i++) {
     char message_contents[] = "This is an RDP message";
     Message* rdp_message = new Message(message_contents, 100);
     
@@ -43,7 +43,7 @@ void rdp_app(void* arg) {
 void dns_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
-  for(int i = 0; i < 1; i++) {
+  for(int i = 0; i < 100; i++) {
     char message_contents[] = "This is an DNS message";
     Message* dns_message = new Message(message_contents, 100);
     
