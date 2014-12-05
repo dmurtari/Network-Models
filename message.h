@@ -1,10 +1,5 @@
-#ifndef __MESSAGE_H
-#define __MESSAGE_H
-#include <stdio.h>
-#include <list>
-#include <string.h>
-using namespace std;
-class Message {
+class Message
+{
 public:
    
     Message( );
@@ -19,15 +14,5 @@ public:
 
 private:
     size_t msglen;
-    class field{
-        public:
-            field(char* data, size_t len){
-                this->data  = data;
-                this->len   = len;
-            }
-            char* data;
-            size_t len;
-    };
-    list<field*> fieldList;
+    char *msg_content;
 };
-#endif
