@@ -57,12 +57,11 @@ int main() {
   ProcessPerMessage* ppm1 = new ProcessPerMessage("12123", "12124");
   ProcessPerMessage* ppm2 = new ProcessPerMessage("12124", "12123");
 
-  sleep(1);
-
   if(DEBUG) { cout << "Dispatching application threads" << endl; }
   message_applications->dispatch_thread(ftp_app, (void*) ppm1);
   message_applications->dispatch_thread(telnet_app, (void*) ppm1);
   message_applications->dispatch_thread(rdp_app, (void*) ppm1);
   message_applications->dispatch_thread(dns_app, (void*) ppm1);
-  while(1);
+  
+  while(1){}
 }
