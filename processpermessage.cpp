@@ -292,7 +292,7 @@ void ProcessPerMessage::receive_message(void *arg) {
   memset((char *)&myaddr, 0, sizeof(myaddr));
   myaddr.sin_family = AF_INET;
   myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  myaddr.sin_port = htons((unsigned short)atoi(ppm->output_port));
+  myaddr.sin_port = htons((unsigned short)atoi(ppm->input_port));
 
   if (bind(udp_sock, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
     perror("bind failed");
