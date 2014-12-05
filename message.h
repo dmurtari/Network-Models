@@ -1,3 +1,7 @@
+#include <list>
+#include <iterator>
+#include <memory.h>
+
 class Message
 {
 public:
