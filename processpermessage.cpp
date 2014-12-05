@@ -1,6 +1,6 @@
 #include "processpermessage.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 ProcessPerMessage::ProcessPerMessage() {
   if(DEBUG) { cout << "Contructing ProcessPerMessage Object" << endl; }
@@ -16,6 +16,18 @@ void ProcessPerMessage::application_send_msg(Message* message, int protocol_id) 
     case FTP:
       if(DEBUG) { cout << "Received FTP send request, sending to FTP" << endl; }
       ftp_send(message, APPLICATION);
+      break;
+    case TELNET:
+      if(DEBUG) { cout << "Received telnet send request, sending to telnet" << endl; }
+      telnet_send(message, APPLICATION);
+      break;
+    case RDP:
+      if(DEBUG) { cout << "Received RDP send request, sending to RDP" << endl; }
+      rdp_send(message, APPLICATION);
+      break;
+    case DNS:
+      if(DEBUG) { cout << "Received DNS send request, sending to DNS" << endl; }
+      dns_send(message, APPLICATION);
       break;
     default:
       cout << "Invalid protocol to send to" << endl;
@@ -217,7 +229,6 @@ void ProcessPerMessage::ethernet_send(Message* message, int higher_level_protoco
   message->msgAddHdr((char*) header, sizeof(ethernet_header));
 
   if(DEBUG) { cout << "Done attaching ethernet header: " << header->higher_level_protocol << endl; }
-  cout << "message->msgLen(): " << message->msgLen() << endl;
   ethernet_receive(message);
 }
 
