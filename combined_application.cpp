@@ -15,6 +15,8 @@ void* ppm_ftp_app(void* arg) {
     ppm->application_send_msg(ftp_message, FTP); 
     usleep(100);
   }
+
+  return (void*) ppm;
 }
 
 void* ppm_telnet_app(void* arg) {
@@ -27,6 +29,8 @@ void* ppm_telnet_app(void* arg) {
     ppm->application_send_msg(telnet_message, TELNET); 
     usleep(100);
   }
+
+  return (void*) ppm;
 }
 
 void* ppm_rdp_app(void* arg) {
@@ -39,6 +43,8 @@ void* ppm_rdp_app(void* arg) {
     ppm->application_send_msg(rdp_message, RDP); 
     usleep(100);
   }
+
+  return (void*) ppm;
 }
 
 void* ppm_dns_app(void* arg) {
@@ -51,6 +57,8 @@ void* ppm_dns_app(void* arg) {
     ppm->application_send_msg(dns_message, DNS); 
     usleep(100);
   }
+
+  return (void*) ppm;
 }
 
 void* ppp_ftp_app(void* arg) {
@@ -68,6 +76,8 @@ void* ppp_ftp_app(void* arg) {
     ppp->application_send_msg(ftp_container, FTP); 
     usleep(100);
   }
+
+  return (void*) ppp;
 }
 
 void* ppp_telnet_app(void* arg) {
@@ -85,6 +95,8 @@ void* ppp_telnet_app(void* arg) {
     ppp->application_send_msg(telnet_container, TELNET); 
     usleep(100);
   }
+
+  return (void*) ppp;
 }
 
 void* ppp_rdp_app(void* arg) {
@@ -102,6 +114,8 @@ void* ppp_rdp_app(void* arg) {
     ppp->application_send_msg(rdp_container, RDP); 
     usleep(100);
   }
+
+  return (void*) ppp;
 }
 
 void* ppp_dns_app(void* arg) {
@@ -119,6 +133,8 @@ void* ppp_dns_app(void* arg) {
     ppp->application_send_msg(dns_container, DNS); 
     usleep(100);
   }
+
+  return (void*) ppp;
 }
 
 int main() {

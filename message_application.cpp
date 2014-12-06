@@ -14,6 +14,8 @@ void* ftp_app(void* arg) {
     ppm->application_send_msg(ftp_message, FTP); 
     usleep(100);
   }
+
+  return (void*) ppm;
 }
 
 void* telnet_app(void* arg) {
@@ -26,6 +28,8 @@ void* telnet_app(void* arg) {
     ppm->application_send_msg(telnet_message, TELNET); 
     usleep(100);
   }
+
+  return (void*) ppm;
 }
 
 void* rdp_app(void* arg) {
@@ -38,6 +42,8 @@ void* rdp_app(void* arg) {
     ppm->application_send_msg(rdp_message, RDP); 
     usleep(100);
   }
+
+  return (void*) ppm;
 }
 
 void* dns_app(void* arg) {
@@ -50,6 +56,8 @@ void* dns_app(void* arg) {
     ppm->application_send_msg(dns_message, DNS); 
     usleep(100);
   }
+  
+  return (void*) ppm;
 }
 
 int main() {

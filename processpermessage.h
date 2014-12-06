@@ -20,14 +20,14 @@
 
 class ProcessPerMessage {
   public:
-    ProcessPerMessage(char* input, char* output);
+    ProcessPerMessage(const char* input, const char* output);
     ~ProcessPerMessage();
     void application_send_msg(Message* message, int protocol_id);
 
   private:
     ThreadPool* message_threads;
-    char* input_port;
-    char* output_port;
+    const char* input_port;
+    const char* output_port;
 
     void ftp_send(Message* message, int higher_level_protocol);
     static void ftp_receive(Message* message);

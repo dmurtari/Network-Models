@@ -19,6 +19,8 @@ void* ftp_app(void* arg) {
     ppp->application_send_msg(ftp_container, FTP); 
     usleep(100);
   }
+
+  return (void*) ppp;
 }
 
 void* telnet_app(void* arg) {
@@ -36,6 +38,8 @@ void* telnet_app(void* arg) {
     ppp->application_send_msg(telnet_container, TELNET); 
     usleep(100);
   }
+
+  return (void*) ppp;
 }
 
 void* rdp_app(void* arg) {
@@ -53,6 +57,8 @@ void* rdp_app(void* arg) {
     ppp->application_send_msg(rdp_container, RDP); 
     usleep(100);
   }
+
+  return (void*) ppp;
 }
 
 void* dns_app(void* arg) {
@@ -70,6 +76,8 @@ void* dns_app(void* arg) {
     ppp->application_send_msg(dns_container, DNS); 
     usleep(100);
   }
+
+  return (void*) ppp;
 }
 
 int main() {

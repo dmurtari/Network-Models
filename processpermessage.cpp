@@ -2,7 +2,7 @@
 
 #define DEBUG 0
 
-ProcessPerMessage::ProcessPerMessage(char* input, char* output) {
+ProcessPerMessage::ProcessPerMessage(const char* input, const char* output) {
   if(DEBUG) { cout << "Contructing ProcessPerMessage Object" << endl; }
   message_threads = new ThreadPool(10);
   input_port = input;

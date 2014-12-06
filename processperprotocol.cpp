@@ -4,7 +4,7 @@
 
 using namespace std;
 
-ProcessPerProtocol::ProcessPerProtocol(char* input, char* output) {
+ProcessPerProtocol::ProcessPerProtocol(const char* input, const char* output) {
 
   if(DEBUG) { cout << "Creating ThreadPool" << endl; }
   protocol_threads = new ThreadPool(17);
