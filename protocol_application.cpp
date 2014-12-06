@@ -74,7 +74,10 @@ void* dns_app(void* arg) {
 
 int main() {
   pthread_t protocol_applications[8];
+  struct timeval start, end;
+  long mtime, seconds, useconds;
 
+  gettimeofday(&start, NULL);
   ProcessPerProtocol* ppp1 = new ProcessPerProtocol("12123", "12124");
   ProcessPerProtocol* ppp2 = new ProcessPerProtocol("12124", "12123");
 
@@ -96,6 +99,13 @@ int main() {
   pthread_join(protocol_applications[5], NULL);
   pthread_join(protocol_applications[6], NULL);
   pthread_join(protocol_applications[7], NULL);
+  gettimeofday(&end, NULL);
+
+  seconds = end.tv_sec - start.tv_sec;
+  useconds = end.tv_usec - start.tv_usec;
+
+  mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+  printf("Elapsed time for Process per Protocol: %ld milleseconds\n", mtime);
 
   return 1;
 }

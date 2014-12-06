@@ -54,7 +54,10 @@ void* dns_app(void* arg) {
 
 int main() {
   pthread_t message_applications[8];
+  struct timeval start, end;
+  long mtime, seconds, useconds;
 
+  gettimeofday(&start, NULL);
   ProcessPerMessage* ppm1 = new ProcessPerMessage("12123", "12124");
   ProcessPerMessage* ppm2 = new ProcessPerMessage("12124", "12123");
 
@@ -76,6 +79,14 @@ int main() {
   pthread_join(message_applications[5], NULL);
   pthread_join(message_applications[6], NULL);
   pthread_join(message_applications[7], NULL);
+
+  gettimeofday(&end, NULL);
+
+  seconds = end.tv_sec - start.tv_sec;
+  useconds = end.tv_usec - start.tv_usec;
+
+  mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+  printf("Elapsed time for Process per Message: %ld milleseconds\n", mtime);
 
   return 1;
 }

@@ -1,9 +1,9 @@
 CC=g++
-FLAGS=-g -std=gnu++11 -Wall -Wextra
+FLAGS=-g -std=gnu++11 -Wall -Wextra -Wno-write-strings
 LIBS=-lpthread
 
 
-all: message_application protocol_application 
+all: message_application protocol_application combined_application
 
 protocol_application: processperprotocol.o message.o threadpool.o protocol_application.cpp
 	$(CC) $(FLAGS) -o $@ $^ $(LIBS)
@@ -11,6 +11,9 @@ protocol_application: processperprotocol.o message.o threadpool.o protocol_appli
 message_application: processpermessage.o message.o threadpool.o message_application.cpp
 	$(CC) $(FLAGS) -o $@ $^ $(LIBS)
 
+combined_application: processpermessage.o processperprotocol.o message.o threadpool.o combined_application.cpp
+	$(CC) $(FLAGS) -o $@ $^ $(LIBS)
+	
 processpermessage.o: processpermessage.cpp 
 	$(CC) $(FLAGS) -o $@ -c $^
 
@@ -27,5 +30,6 @@ message.o: message.cpp
 	$(CC) $(FLAGS) -o $@ -c $^
 
 clean:
-	rm -f threadpool.o eventscheduler.o processperprotocol.o protocol_application message_application
+	rm -f threadpool.o eventscheduler.o processperprotocol.o protocol_application message_application combined_application
+
 
