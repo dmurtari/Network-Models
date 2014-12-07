@@ -9,7 +9,9 @@ void* ppm_ftp_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
   for(int i = 0; i < 100; i++) {
-    char message_contents[] = "This is an FTP message";
+    char message_contents[100];
+    sprintf(message_contents, "%d:FTP:FTP message sent over PPM", i);
+
     Message* ftp_message = new Message(message_contents, 100);
     
     ppm->application_send_msg(ftp_message, FTP); 
@@ -23,7 +25,9 @@ void* ppm_telnet_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
   for(int i = 0; i < 100; i++) {
-    char message_contents[] = "This is an telnet message";
+    char message_contents[100];
+    sprintf(message_contents, "%d:Telnet:Telnet message sent over PPM", i);
+
     Message* telnet_message = new Message(message_contents, 100);
     
     ppm->application_send_msg(telnet_message, TELNET); 
@@ -37,7 +41,9 @@ void* ppm_rdp_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
   for(int i = 0; i < 100; i++) {
-    char message_contents[] = "This is an RDP message";
+    char message_contents[100];
+    sprintf(message_contents, "%d:RDP:RDP message sent over PPM", i);
+
     Message* rdp_message = new Message(message_contents, 100);
     
     ppm->application_send_msg(rdp_message, RDP); 
@@ -51,7 +57,9 @@ void* ppm_dns_app(void* arg) {
   ProcessPerMessage* ppm = (ProcessPerMessage*) arg;
 
   for(int i = 0; i < 100; i++) {
-    char message_contents[] = "This is an DNS message";
+    char message_contents[100];
+    sprintf(message_contents, "%d:DNS:DNS message sent over PPM", i);
+
     Message* dns_message = new Message(message_contents, 100);
     
     ppm->application_send_msg(dns_message, DNS); 
@@ -65,7 +73,9 @@ void* ppp_ftp_app(void* arg) {
   ProcessPerProtocol* ppp = (ProcessPerProtocol*) arg;
 
   for(int i = 0; i < 100; i++) {
-    char message_contents[] = "This is an FTP message";
+    char message_contents[100];
+    sprintf(message_contents, "%d:FTP:FTP message sent over PPP", i);
+
     Message* ftp_message = new Message(message_contents, 100);
     send_message ftp_container;
 
@@ -84,7 +94,9 @@ void* ppp_telnet_app(void* arg) {
   ProcessPerProtocol* ppp = (ProcessPerProtocol*) arg;
 
   for(int i = 0; i < 100; i++) {
-    char message_contents[] = "This is a telnet message";
+    char message_contents[100];
+    sprintf(message_contents, "%d:Telnet:Telnet message sent over PPP", i);
+
     Message* telnet_message = new Message(message_contents, 100);
     send_message telnet_container;
 
@@ -103,7 +115,9 @@ void* ppp_rdp_app(void* arg) {
   ProcessPerProtocol* ppp = (ProcessPerProtocol*) arg;
 
   for(int i = 0; i < 100; i++) {
-    char message_contents[] = "This is an RDP message";
+    char message_contents[100];
+    sprintf(message_contents, "%d:RDP:RDP message sent over PPP", i);
+
     Message* rdp_message = new Message(message_contents, 100);
     send_message rdp_container;
 
@@ -122,7 +136,9 @@ void* ppp_dns_app(void* arg) {
   ProcessPerProtocol* ppp = (ProcessPerProtocol*) arg;
 
   for(int i = 0; i < 100; i++) {
-    char message_contents[] = "This is an DNS message";
+    char message_contents[100];
+    sprintf(message_contents, "%d:DNS:DNS message sent over PPP", i);
+
     Message* dns_message = new Message(message_contents, 100);
     send_message dns_container;
 
